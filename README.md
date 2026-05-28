@@ -16,4 +16,4 @@ Open `index.html` in any browser. That's it.
 
 ## Deployed URL
 
-[Add your Netlify/Vercel URL here]
+ https://ayeshaafzal13.github.io/habit-tracker/
