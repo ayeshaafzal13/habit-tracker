@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Habit Tracker | Build Your Streaks</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        
+        h1 {
+            color: white;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.5rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+        
+        /* Add habit section */
+        .add-habit {
+            margin-bottom: 30px;
+            display: flex;
+            gap: 10px;
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        .add-habit input {
+            flex: 1;
+            padding: 12px;
+            font-size: 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+        }
+        
+        .add-habit input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102,126,234,0.1);
+        }
+        
+        .add-habit button {
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        
+        .add-habit button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102,126,234,0.4);
+        }
+        
+        /* Week navigation */
+        .week-nav {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            gap: 10px;
+            flex-wrap: wrap;
+            background: white;
+            padding: 15px 20px;
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        .week-nav button {
+            padding: 8px 16px;
+            background: #f8f9fa;
+            color: #495057;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+        
+        .week-nav button:hover {
+            background: #667eea;
+            color: white;
+            transform: translateY(-1px);
+        }
+        
+        #weekRange {
+            font-weight: 600;
+            color: #667eea;
+            background: #f0f0ff;
+            padding: 6px 12px;
+            border-radius: 8px;
+        }
+        
+        /* Habit grid */
+        .habit-grid {
+            overflow-x: auto;
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 600px;
+        }
+        
+        th, td {
+            border: 1px solid #e9ecef;
+            padding: 12px;
+            text-align: center;
+        }
+        
+        th {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            font-weight: 600;
+            color: #495057;
+        }
+        
+        /* Today column highlight */
+        .today {
+            background: linear-gradient(135deg, #fff5e6 0%, #ffe8d4 100%);
+            position: relative;
+            box-shadow: inset 0 0 0 2px #ff9800;
+        }
+        
+        /* Checkbox styling */
+        .habit-check {
+            width: 24px;
+            height: 24px;
+            cursor: pointer;
+            accent-color: #4caf50;
+            transition: transform 0.1s ease;
+        }
+        
+        .habit-check:hover {
+            transform: scale(1.1);
+        }
+        
+        .habit-check:disabled {
+            cursor: not-allowed;
+            opacity: 0.5;
+        }
+        
+        /* Delete habit button */
+        .delete-habit {
+            background: linear-gradient(135deg, #f56565 0%, #ed64a6 100%);
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            cursor: pointer;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+        
+        .delete-habit:hover {
+            transform: scale(1.05);
+            box-shadow: 0 2px 8px rgba(245,101,101,0.4);
+        }
+        
+        /* Empty state */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-radius: 15px;
+            color: #666;
+        }
+        
+        .empty-state h3 {
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 1.5rem;
+        }
+        
+        /* Streak styling */
+        td:first-child {
+            font-weight: 600;
+            color: #495057;
+            background: #f8f9fa;
+        }
+        
+        td:nth-child(2) {
+            background: linear-gradient(135deg, #fff5e6 0%, #ffe8d4 100%);
+            font-weight: 700;
+            color: #f59e0b;
+        }
+        
+        /* Responsive design */
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+            
+            h1 {
+                font-size: 1.8rem;
+            }
+            
+            th, td {
+                padding: 8px;
+                font-size: 12px;
+            }
+            
+            .habit-check {
+                width: 20px;
+                height: 20px;
+            }
+            
+            .add-habit {
+                padding: 15px;
+                flex-direction: column;
+            }
+            
+            .week-nav {
+                padding: 12px;
+            }
+            
+            .habit-grid {
+                padding: 12px;
+            }
+        }
+        
+        /* Animation for checkmarks */
+        @keyframes checkPop {
+            0% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.3);
+            }
+            100% {
+                transform: scale(1);
+            }
+        }
+        
+        .habit-check:checked {
+            animation: checkPop 0.2s ease;
+        }
+        
+        /* Table row hover */
+        tr:hover td {
+            background: #f8f9fa;
+        }
+        
+        tr:hover td:first-child {
+            background: #e9ecef;
+        }
+    </style>
+</head>
+<body>
+    <h1>📊 Habit Tracker</h1>
+    
+    <div class="add-habit">
+        <input type="text" id="habitName" placeholder="Enter habit (e.g., Exercise, Read)">
+        <button id="addHabitBtn">✨ Add Habit</button>
+    </div>
+    
+    <div class="week-nav">
+        <button id="prevWeekBtn">← Previous Week</button>
+        <span id="weekRange"></span>
+        <button id="thisWeekBtn">📍 Back to This Week</button>
+        <button id="nextWeekBtn">Next Week →</button>
+    </div>
+    
+    <div class="habit-grid" id="habitGrid">
+        <!-- Grid will be inserted here -->
+    </div>
+
+    <script>
+        // Data structure
+        let habits = [];
+        let completions = {};
+        let currentWeekStart = null; // Monday of current week
+        
+        // Initialize or load from localStorage
+        function loadData() {
+            const savedHabits = localStorage.getItem('habits');
+            const savedCompletions = localStorage.getItem('completions');
+            
+            if (savedHabits) {
+                habits = JSON.parse(savedHabits);
+            } else {
+                // Add some demo habits
+                habits = [
+                    { id: '1', name: '🏃 Exercise' },
+                    { id: '2', name: '📚 Read' }
+                ];
+            }
+            
+            if (savedCompletions) {
+                completions = JSON.parse(savedCompletions);
+            } else {
+                completions = {};
+            }
+        }
+        
+        // Save to localStorage
+        function saveData() {
+            localStorage.setItem('habits', JSON.stringify(habits));
+            localStorage.setItem('completions', JSON.stringify(completions));
+        }
+        
+        // Get Monday of current week
+        function getMonday(date) {
+            const d = new Date(date);
+            const day = d.getDay();
+            const diff = (day === 0 ? -6 : 1) - day; // Adjust when day is Sunday
+            const monday = new Date(d);
+            monday.setDate(d.getDate() + diff);
+            monday.setHours(0, 0, 0, 0);
+            return monday;
+        }
+        
+        // Initialize current week
+        function initCurrentWeek() {
+            if (!currentWeekStart) {
+                currentWeekStart = getMonday(new Date());
+            }
+        }
+        
+        // Get week days (Monday to Sunday)
+        function getWeekDays(startDate) {
+            const days = [];
+            for (let i = 0; i < 7; i++) {
+                const day = new Date(startDate);
+                day.setDate(startDate.getDate() + i);
+                days.push(day);
+            }
+            return days;
+        }
+        
+        // Check if a date is today
+        function isToday(date) {
+            const today = new Date();
+            return date.toDateString() === today.toDateString();
+        }
+        
+        // Format date as YYYY-MM-DD for storage key
+        function formatDateKey(date) {
+            return date.toISOString().split('T')[0];
+        }
+        
+        // Toggle habit completion
+        function toggleHabit(habitId, date) {
+            const dateKey = formatDateKey(date);
+            
+            if (!completions[habitId]) {
+                completions[habitId] = {};
+            }
+            
+            if (completions[habitId][dateKey]) {
+                delete completions[habitId][dateKey];
+            } else {
+                completions[habitId][dateKey] = true;
+            }
+            
+            saveData();
+            renderGrid();
+        }
+        
+        // Calculate streak for a habit
+        function calculateStreak(habitId) {
+            let streak = 0;
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            
+            // Check from today backwards
+            for (let i = 0; i < 365; i++) { // Max 365 day streak
+                const checkDate = new Date(today);
+                checkDate.setDate(today.getDate() - i);
+                const dateKey = formatDateKey(checkDate);
+                
+                if (completions[habitId] && completions[habitId][dateKey]) {
+                    streak++;
+                } else if (i > 0) {
+                    break; // Break on first missing day
+                }
+            }
+            
+            return streak;
+        }
+        
+        // Add new habit
+        function addHabit() {
+            const input = document.getElementById('habitName');
+            const name = input.value.trim();
+            
+            if (name === '') {
+                alert('Please enter a habit name');
+                return;
+            }
+            
+            const newHabit = {
+                id: Date.now().toString(),
+                name: name
+            };
+            
+            habits.push(newHabit);
+            saveData();
+            renderGrid();
+            input.value = ''; // Clear input
+        }
+        
+        // Delete habit
+        function deleteHabit(habitId) {
+            if (confirm('Are you sure you want to delete this habit?')) {
+                habits = habits.filter(h => h.id !== habitId);
+                delete completions[habitId];
+                saveData();
+                renderGrid();
+            }
+        }
+        
+        // Render the habit grid
+        function renderGrid() {
+            const container = document.getElementById('habitGrid');
+            
+            if (habits.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <h3>🎯 No habits yet!</h3>
+                        <p>Add your first habit above to start tracking</p>
+                        <small>✨ Try: Exercise, Read, Meditate, or Journal</small>
+                    </div>
+                `;
+                return;
+            }
+            
+            const weekDays = getWeekDays(currentWeekStart);
+            const today = new Date();
+            
+            // Update week range display
+            const weekStartStr = weekDays[0].toLocaleDateString();
+            const weekEndStr = weekDays[6].toLocaleDateString();
+            document.getElementById('weekRange').textContent = `${weekStartStr} - ${weekEndStr}`;
+            
+            // Build table
+            let html = '<table>';
+            
+            // Header row with days
+            html += '<thead><tr><th>Habit</th><th>🔥 Streak</th>';
+            for (let i = 0; i < weekDays.length; i++) {
+                const day = weekDays[i];
+                const dayName = day.toLocaleDateString('en-US', { weekday: 'short' });
+                const dayDate = day.getDate();
+                const isTodayClass = isToday(day) ? 'class="today"' : '';
+                html += `<th ${isTodayClass}>${dayName}<br><small>${dayDate}</small></th>`;
+            }
+            html += '<th></th></tr></thead>';
+            
+            // Body rows (habits)
+            html += '<tbody>';
+            for (const habit of habits) {
+                const streak = calculateStreak(habit.id);
+                html += `<tr>
+                    <td style="text-align:left;font-weight:500;">${escapeHtml(habit.name)}</td>
+                    <td>🔥 ${streak}</td>`;
+                
+                for (const day of weekDays) {
+                    const dateKey = formatDateKey(day);
+                    const isChecked = completions[habit.id] && completions[habit.id][dateKey];
+                    const isFuture = day > today;
+                    const isTodayClass = isToday(day) ? 'class="today"' : '';
+                    
+                    html += `<td ${isTodayClass}>
+                        <input type="checkbox" 
+                               class="habit-check"
+                               data-habit-id="${habit.id}"
+                               data-date="${dateKey}"
+                               ${isChecked ? 'checked' : ''}
+                               ${isFuture ? 'disabled' : ''}>
+                     </td>`;
+                }
+                
+                html += `<td><button class="delete-habit" data-habit-id="${habit.id}">🗑️ Delete</button></td>`;
+                html += `</tr>`;
+            }
+            html += '</tbody></table>';
+            
+            container.innerHTML = html;
+            
+            // Attach event listeners
+            document.querySelectorAll('.habit-check').forEach(checkbox => {
+                checkbox.addEventListener('change', (e) => {
+                    const habitId = checkbox.dataset.habitId;
+                    const dateKey = checkbox.dataset.date;
+                    const date = new Date(dateKey);
+                    
+                    if (checkbox.checked) {
+                        // Mark as complete
+                        if (!completions[habitId]) completions[habitId] = {};
+                        completions[habitId][dateKey] = true;
+                    } else {
+                        // Mark as incomplete
+                        if (completions[habitId]) {
+                            delete completions[habitId][dateKey];
+                        }
+                    }
+                    
+                    saveData();
+                    renderGrid(); // Re-render to update streak
+                });
+            });
+            
+            document.querySelectorAll('.delete-habit').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const habitId = btn.dataset.habitId;
+                    deleteHabit(habitId);
+                });
+            });
+        }
+        
+        // Helper: escape HTML to prevent XSS
+        function escapeHtml(str) {
+            const div = document.createElement('div');
+            div.textContent = str;
+            return div.innerHTML;
+        }
+        
+        // Navigation functions
+        function goToPrevWeek() {
+            currentWeekStart.setDate(currentWeekStart.getDate() - 7);
+            renderGrid();
+        }
+        
+        function goToNextWeek() {
+            const nextWeek = new Date(currentWeekStart);
+            nextWeek.setDate(currentWeekStart.getDate() + 7);
+            
+            // Don't allow future weeks beyond current week
+            const today = new Date();
+            const thisMonday = getMonday(today);
+            if (nextWeek > thisMonday) {
+                alert("Can't go to future weeks yet");
+                return;
+            }
+            
+            currentWeekStart = nextWeek;
+            renderGrid();
+        }
+        
+        function goToThisWeek() {
+            currentWeekStart = getMonday(new Date());
+            renderGrid();
+        }
+        
+        // Initialize and set up event listeners
+        document.addEventListener('DOMContentLoaded', () => {
+            loadData();
+            initCurrentWeek();
+            renderGrid();
+            
+            document.getElementById('addHabitBtn').addEventListener('click', addHabit);
+            document.getElementById('habitName').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') addHabit();
+            });
+            document.getElementById('prevWeekBtn').addEventListener('click', goToPrevWeek);
+            document.getElementById('nextWeekBtn').addEventListener('click', goToNextWeek);
+            document.getElementById('thisWeekBtn').addEventListener('click', goToThisWeek);
+        });
+    </script>
+</body>
+</html>
